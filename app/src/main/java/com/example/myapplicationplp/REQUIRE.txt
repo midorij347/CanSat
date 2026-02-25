@@ -1,0 +1,5 @@
+あなたは「/Users/tanakanobuaki/AndroidStudioProjects/MyApplicationplp/app/src/main/java/com/example/myapplicationplp/README.md」で私のプロダクトをまとめてくれましたね。
+ここでは重い処理を持つ機能を削除しながら、「別のプロジェクトの(/Users/tanakanobuaki/AndroidStudioProjects/tanakanobuaki/)に」コードを丸々コピーしてもらいます。
+主に必要な機能はREADME.mdのままではありますが、新しいプロジェクトでは以下の機能を削除してもらいます。
+・UI層は全く必要ありません。
+・録画層も全く必要ないです。なのでスクリーンレコードとカメラも準備する必要がないし、AWSに録画系の動画データを送らなくてもいいです。IMU系のデータは引き続き送ってください。

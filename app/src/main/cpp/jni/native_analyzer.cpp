@@ -26,12 +26,35 @@ Java_com_example_myapplicationplp_NativeAnalyzer_processYuv420(
         for(int x=0; x<w; ++x) *src.at(x,y) = float(row[x]);
     }
 
+    // 勾配用バッファ
+    Gray dx(w,h), dy(w,h);
+
+// 簡単な中央差分で勾配を計算（端は 0 のまま）
+    for (int y = 1; y < h-1; ++y) {
+        for (int x = 1; x < w-1; ++x) {
+            float cxp = *src.at(x+1, y);
+            float cxm = *src.at(x-1, y);
+            float cyp = *src.at(x,   y+1);
+            float cym = *src.at(x,   y-1);
+            *dx.at(x,y) = 0.5f * (cxp - cxm);
+            *dy.at(x,y) = 0.5f * (cyp - cym);
+        }
+    }
+
     // カメラからグレースケール画像を送る
     // dx, dy を作って Filter::edge_amp_dir → zero_crossing
     Filter f;
     f.edge_amp_dir(dx, dy, amp, dir);
     f.zero_crossing(amp, dir, zc);
 
+    // amp の平均値を返す例
+    double sum = 0.0;
+    for (int y = 0; y < h; ++y)
+        for (int x = 0; x < w; ++x)
+            sum += *amp.at(x,y);
+    int avg = (int)(sum / (w * (double)h));
+
+
     env->ReleaseByteArrayElements(yArr, yptr, JNI_ABORT);
-    return 0;
+    return avg;
 }

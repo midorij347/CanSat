@@ -1,0 +1,13 @@
+Q1. UIがなくなった後の「アプリの入口」はどうしますか？
+真っ黒にする必要もありません。ありのままの白で。
+Q2. FusionController / PoseEstimatorMAP / GridRenderer は残しますか？
+GridRenderer は Canvas への描画コード → UI依存なので削除対象に見えます
+FusionController は ARCore セッションに依存していますので、削除対象です。
+PoseEstimatorMAP / So3.kt / LinAlg6.kt は純粋な数学コードですので、処理が重くなる要因ではありません。そのまま新しいプロジェクトにも連れて行きましょう。
+Q3. ARCore は削除しますか？
+します。
+Q4. NativeAnalyzer（C++ JNI）は残しますか？
+Q5. ScreenPatternLogger は残しますか？
+Q6. モータのデューティーテストコードは残しますか？
+Q7. USB接続のトリガーはどうしますか？
+Q8. 新プロジェクトのパッケージ名は何を使いますか？

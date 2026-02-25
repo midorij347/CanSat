@@ -165,6 +165,7 @@ class UsbCdcRepo(
     fun read(buf: ByteArray, timeoutMs: Int = 100): Int {
         val c = conn ?: return -1
         val inEp = epIn ?: return -1
+
         return c.bulkTransfer(inEp, buf, buf.size, timeoutMs) // -1はタイムアウト
     }
 }
