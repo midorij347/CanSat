@@ -199,7 +199,7 @@ class SpotlightActivity : ComponentActivity() {
         super.onStart()
 
         // デューティ比のテスト用：-1.0〜+1.0 を往復させる
-        dutyTestJob = lifecycleScope.launch {
+        dutyTestJob = lifecycleScope.launch(Dispatchers.IO) {
             var duty = -1.0f
             var dir = 0.05f   // 1ステップの増減量（調整してOK）
 
