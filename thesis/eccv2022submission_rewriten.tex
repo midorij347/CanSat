@@ -1,0 +1,172 @@
+% 5-page (excluding references) condensed draft for ECCV Workshop style.
+% Based on eccv2022submission_rewritten.tex (user-provided).
+\documentclass[runningheads]{llncs}
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{url}
+
+\title{Terrain Sensing with Smartphone Structured Light:\\
+Topology-Constrained 2D-DTW for Grid Pattern Matching}
+
+\author{Nobuaki Tanaka}
+\institute{Meiji University\\ \email{ev250024@meiji.ac.jp}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Small rovers often struggle on visually ``flat'' but subtly uneven terrain.
+We study a low-cost structured-light approach using a single smartphone:
+the screen projects a high-contrast grid and the front camera captures its deformation.
+A key challenge is robustly matching the observed grid intersections to the ideal lattice under
+perspective distortion and missing detections.
+We propose a \emph{topology-constrained 2D dynamic time warping (2D-DTW)} scheme that enforces
+global grid consistency while keeping computation lightweight.
+Given the matched correspondences, we triangulate local 3D ground profiles from a single frame.
+Experiments with an Android prototype show that the grid-based method is more stable than
+feature-based baselines on low-texture surfaces.
+\keywords{structured light \and grid matching \and dynamic time warping \and mobile sensing \and terrain reconstruction}
+\end{abstract}
+
+\section{Introduction}
+Low-cost mobile robots and CanSat-style rovers frequently operate on uneven terrain where small bumps
+or local tilts can destabilize locomotion.
+Depth sensors (e.g., LiDAR) can be bulky or expensive; in contrast, structured-light triangulation
+projects a known pattern and infers 3D geometry from its deformation.
+Modern smartphones already provide an integrated display and camera, motivating a phone-only
+structured-light sensor for ground profiling.
+
+The main technical bottleneck is \emph{grid correspondence}:
+the projected lattice is observed under perspective distortion, partial occlusion, and noise.
+Naively applying 1D-DTW independently to rows/columns breaks the global lattice topology, while
+general 2D-DTW for images is computationally heavy.
+We therefore introduce a topology-constrained 2D-DTW tailored to rectangular grids:
+it performs column-wise alignment under a global monotonicity constraint and can be paired with a
+row-wise pass for full lattice matching.
+
+\textbf{Contributions.}
+(i) We describe a smartphone-only structured-light pipeline for extracting grid intersections and reconstructing
+local terrain unevenness.
+(ii) We propose a topology-constrained 2D-DTW formulation that yields globally consistent grid matching
+with a simple dynamic program.
+
+\section{Related work (brief)}
+Two-dimensional warping via dynamic programming has been studied for image/matrix alignment, including
+monotonic 2D warping of Uchida and Sakoe.
+DTW variants for rotation/affine invariance have been explored in handwriting and symbol recognition.
+Our setting differs in that the target is a \emph{known rectangular grid} and we exploit that topology to
+restrict the warping and reduce cost.
+
+\section{Method}
+\subsection{System setup and grid extraction}
+A smartphone is rigidly mounted facing downward.
+The display renders a high-contrast rectangular grid; the front camera captures the pattern on the ground.
+Each frame is processed by a lightweight pipeline: band-limited filtering, LoG enhancement, skeletonization,
+and intersection detection, yielding a set of observed grid nodes in image coordinates.
+
+\subsection{Topology-constrained 2D-DTW for grid matching}
+Let the ideal display grid have $q$ vertical columns and $p$ rows of intersections.
+From each frame, we sort detected intersections into \emph{column candidates} (roughly vertical groups)
+and represent each observed column as a 1D sequence of row positions/feature values.
+Denote by $A_i\in\mathbb{R}^{p}$ the $i$-th ideal column profile and by $B_j\in\mathbb{R}^{r}$ the $j$-th observed
+column profile ($r$ may vary due to missing detections).
+
+\paragraph{Step 1: column-to-column distance landscape.}
+We compute a DTW distance for each pair of columns
+\[
+D_{i,j} := \mathrm{DTW}(A_i,B_j),\qquad i=1,\dots,q,\ \ j=1,\dots,s,
+\]
+forming a matrix $D\in\mathbb{R}^{q\times s}$.
+
+\paragraph{Step 2: ``river path'' enforcing global consistency.}
+We find a single monotone path through $D$ that follows a low-cost valley.
+Formally, we minimize the cumulative cost along a DTW-style warping path on the $(i,j)$ grid.
+This yields a globally consistent mapping $a(i)$ from ideal columns to observed columns.
+We then repeat the same procedure on rows to obtain consistent row indices, and finally assign each detected
+intersection a unique lattice index $(\hat{k},\hat{i})$.
+
+\paragraph{Why this is ``2D'' while staying light.}
+The 2D aspect is the global optimization over the \emph{matrix} $D$ (not independent 1D alignments),
+which suppresses abrupt column jumps and preserves lattice topology.
+The computation is still based on 1D DTW primitives and a 2D dynamic program over $D$.
+
+\subsection{Single-frame triangulation}
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\linewidth]{smartphone_triangulatin.ng}
+\caption{\textbf{Triangulation geometry in our smartphone structured-light setup.}
+A display point on the screen (virtual light source) and the camera ray associated with a detected grid intersection define two rays.
+Their intersection with the ground plane (via least-squares) yields the 3D point.
+The baseline between screen and camera and the phone-to-ground distance govern depth sensitivity.}
+\label{fig:triangulation_geometry}
+\end{figure}
+
+With camera calibration $P=K[R\mid \bm t]$, each matched pair consists of
+(i) a display grid node $\bm S(u_d,v_d)$ (treated as a virtual light source on the screen plane),
+and (ii) an observed image pixel $\bm u$ for the corresponding ground intersection.
+Assuming a locally planar ground under the phone, we triangulate the ground point as the least-squares
+intersection of (a) the camera back-projection ray from $\bm u$ and (b) the ray emitted from $\bm S(u_d,v_d)$
+toward the ground plane.
+The reconstructed set of intersections forms a dense local height map.
+Figure~\ref{fig:triangulation_geometry} illustrates the geometric configuration used for reconstruction.
+
+\section{Experiments}
+\subsection{Setup}
+We implemented the full pipeline as an Android application.
+The phone was mounted at a fixed height ($h=3.0$\,cm) above the floor, and the viewing angle was restricted
+to about $\pm 10^\circ$ using a narrow field-of-view film.
+We compared: (i) the proposed structured-light grid + topology-constrained 2D-DTW matching + triangulation,
+(ii) a feature-based baseline using ORB+RANSAC with conventional triangulation/bundle adjustment,
+and (optionally) (iii) grid + nearest-neighbor matching without DTW regularization.
+We tested multiple floor textures (high/medium/low) and placed blocks of known height for evaluation.
+
+
+\begin{figure}[t]
+\centering
+\begin{minipage}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{20260228_20}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{lower_half.ng}
+\end{minipage}
+\caption{\textbf{Prototype and raw input.}
+\emph{Left:} our rover prototype with a downward-facing smartphone projecting a grid on the display.
+\emph{Right:} a raw front-camera frame when the grid is projected onto an aluminum-foil surface; only a partial region of the pattern is visible, which currently leads to unstable correspondence estimation.}
+\label{fig:prototype_and_raw}
+\end{figure}
+
+\paragraph{Practical note and current limitation.}
+In early trials, the projected pattern sometimes appears only partially in the front camera (Fig.~\ref{fig:prototype_and_raw}, right), e.g., due to viewing angle, glare, or insufficient field of view.
+Our current implementation assumes that a sufficient portion of the lattice is visible; when too few intersections are detected, the matching and triangulation become unreliable.
+Improving robustness to partial observations (e.g., stronger priors on grid geometry, temporal integration, or automatic exposure control) is left for future work.
+
+\paragraph{Why not use IR/FaceID depth?}
+If a device provides an IR depth module (e.g., a structured-light or ToF sensor used for face authentication), obtaining depth can be much easier.
+However, not all phones include such IR hardware, and additional depth pipelines may be computationally heavy for small robots.
+Our approach targets the hardware-constrained setting: \emph{no IR camera}, \emph{commodity RGB camera}, and lightweight computation.
+Moreover, the proposed topology-constrained 2D-DTW is a generic alignment tool and may be applicable beyond this specific grid pattern.
+
+\paragraph{Ongoing experiments.}
+We plan to continuously publish experiment videos, logs, and updates at: \url{https://www.youtube.com/@horoujhoma}.
+
+\subsection{Observations}
+On high-texture scenes, the feature baseline is competitive.
+On medium/low-texture surfaces, the feature baseline often fails to produce enough stable correspondences,
+while the structured-light grid keeps many valid matches and yields a more stable profile.
+These results suggest that explicit structured-light correspondences are beneficial when natural features are scarce.
+
+\section{Conclusion}
+We presented a smartphone-only structured-light terrain sensing pipeline and a topology-constrained 2D-DTW
+formulation for robust grid pattern matching.
+The key idea is to enforce global lattice consistency by optimizing a monotone ``river path'' over a DTW distance
+landscape, while keeping computation based on 1D DTW primitives.
+Future work includes more extensive quantitative evaluation and integration with rover navigation.
+
+\nocite{*}
+\bibliographystyle{splncs04}
+\bibliography{refs}
+\end{document}

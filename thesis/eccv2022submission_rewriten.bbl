@@ -1,0 +1,30 @@
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{apple_faceid_advanced_tech}
+{Apple Inc.}: About face id advanced technology. \url{https://support.apple.com/en-us/102381} (Dec 2024), apple Support
+
+\bibitem{fornes2010rotation}
+Forn{\'e}s, A., Llad{\'o}s, J., S{\'a}nchez, G., Karatzas, D.: Rotation invariant hand-drawn symbol recognition based on a dynamic time warping model. International Journal on Document Analysis and Recognition (IJDAR)  \textbf{13}(3),  229--241 (2010)
+
+\bibitem{3d_roatation}
+Kanatani, K.: 3D Rotation:Parameter Computation and lie-Algebra based Optimization. KyoritsuShuppan (2021)
+
+\bibitem{kanatani2011bundle}
+Kanatani, K., Sugaya, Y.: Bundle adjustment for 3-d reconstruction: Implementation and evaluation. Memoirs of the Faculty of Engineering, Okayama University  \textbf{45}, ~1--9 (2011)
+
+\bibitem{GonzalezWoods}
+Koutaki, G., Uchimura, K.: Introduction to Image Processing. BaifuKan, first edn. (2008)
+
+\bibitem{1699352}
+Qiao, Y., Yasuhara, M.: Affine invariant dynamic time warping and its application to online rotated handwriting recognition. In: 18th International Conference on Pattern Recognition (ICPR'06). vol.~2, pp. 905--908 (2006). \doi{10.1109/ICPR.2006.228}
+
+\bibitem{711195}
+Uchida, S., Sakoe, H.: A monotonic and continuous two-dimensional warping based on dynamic programming. In: Proceedings. Fourteenth International Conference on Pattern Recognition (Cat. No.98EX170). vol.~1, pp. 521--524 vol.1 (1998). \doi{10.1109/ICPR.1998.711195}
+
+\bibitem{e82-d_3_693}
+UCHIDA, S., SAKOE, H.: An efficient two-dimensional warping algorithm. IEICE TRANSACTIONS on Information  \textbf{E82-D}(3),  693--700 (March 1999)
+
+\end{thebibliography}
